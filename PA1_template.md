@@ -1,25 +1,15 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: Matt Narrell
-date: February 15, 2015
-output: 
-  html_document:
-    keep_md: true
-    toc: true
-    theme: spacelab
-    highlight: haddock
----
+# Reproducible Research: Peer Assessment 1
+Matt Narrell  
+February 15, 2015  
 
 
 
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='figure/',
-                      warning=FALSE, message=FALSE)
-```
+
 
 
 The following libraries are used in this data analysis.
-```{r message=FALSE}
+
+```r
 library("dplyr")
 library("lubridate")
 library("ggplot2")
@@ -31,7 +21,8 @@ library("xtable")
 
 ## Loading and preprocessing the data
 If necessary, load the CSV and transform the date variable to a POSIXct format via the [Lubridate](http://cran.r-project.org/web/packages/lubridate/index.html) package.
-```{r}
+
+```r
 if (!exists("act")) {
   if (!file.exists("./data/activity.csv")) {
     unzip("activity.zip", exdir = "./data")
@@ -44,7 +35,8 @@ if (!exists("act")) {
 
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 total_steps_per_day <- act %>%
   na.omit() %>%
   select(date, steps) %>%
@@ -59,17 +51,22 @@ total_steps_per_day_plot <- ggplot(total_steps_per_day, aes(x = total_steps)) +
   ggtitle("Frequency of Total Steps per Day")
 
 print(total_steps_per_day_plot)
+```
 
+![](figure/unnamed-chunk-3-1.png) 
+
+```r
 mean_total_steps_per_day <- mean(total_steps_per_day$total_steps)
 median_total_steps_per_day <- median(total_steps_per_day$total_steps)
 ```
-The Mean Total Steps per Day is **`r format(mean_total_steps_per_day)`**
-The Median Total Steps per Day is **`r format(median_total_steps_per_day)`**
+The Mean Total Steps per Day is **10766.19**
+The Median Total Steps per Day is **10765**
 
 
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 avg_daily_activity <- act %>%
   na.omit() %>%
   group_by(interval, date) %>%
@@ -87,11 +84,14 @@ avg_daily_activity_plot <- ggplot(avg_daily_activity, aes(x = interval, y = avg_
 
 print(avg_daily_activity_plot)
 ```
-The maximum number of steps is **`r format(max_daily_activity$avg_steps_per_day)`** at the **`r format(max_daily_activity$interval)`** interval.
+
+![](figure/unnamed-chunk-4-1.png) 
+The maximum number of steps is **206.1698** at the **835** interval.
 
 
 ## Inputing missing values
-```{r}
+
+```r
 fill_na_with_mean <- function(steps, intvl) {
   if (is.na(steps)) {
     (avg_daily_activity %>% filter(interval == intvl))$avg_steps_per_day
@@ -130,14 +130,26 @@ print(total_steps_per_day_plot, vp = viewport(layout.pos.row = 1, layout.pos.col
 print(total_steps_per_day_adj_plot, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 ```
 
-```{r results='asis'}
+![](figure/unnamed-chunk-5-1.png) 
+
+
+```r
 print(xtable(mean_median_comparison), type = 'html')
 ```
+
+<!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
+<!-- Sun Feb 15 13:04:24 2015 -->
+<table border=1>
+<tr> <th>  </th> <th> mean </th> <th> median </th>  </tr>
+  <tr> <td align="right"> original </td> <td align="right"> 10766.19 </td> <td align="right"> 10765.00 </td> </tr>
+  <tr> <td align="right"> adjusted </td> <td align="right"> 10766.19 </td> <td align="right"> 10766.19 </td> </tr>
+   </table>
 Adjusting the mean and median **does not** have much impact on the estimates of the total daily number of steps
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 categorize_day <- function(date) {
   if (grepl(wday(date, label = TRUE), "Sat|Sun")) {
     "Weekend"
@@ -160,5 +172,7 @@ day_factored_plot <- ggplot(day_factored, aes(x = interval, y = avg_steps)) +
 
 print(day_factored_plot)
 ```
+
+![](figure/unnamed-chunk-7-1.png) 
 
 **Yes** there are differences in activity patterns between weekdays and weekends.  It appears that during the weekdays, the subject's activities are clustered around a shorter interval.  During the weekends, the subject's activities are more spread out and there are more instances of activity at longer intervals.
